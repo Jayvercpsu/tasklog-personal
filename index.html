@@ -58,14 +58,12 @@ body::before {
     radial-gradient(ellipse 40% 40% at 50% 110%, rgba(160,100,255,0.08) 0%, transparent 70%);
 }
 
-/* ── layout ── */
 .shell {
   position: relative; z-index: 1;
   max-width: 860px; margin: 0 auto;
   padding: 0 28px 140px;
 }
 
-/* ── header ── */
 header {
   position: sticky; top: 0; z-index: 100;
   padding: 28px 0 16px;
@@ -115,7 +113,6 @@ header {
   margin: 16px 0 14px; border-radius: 1px;
 }
 
-/* ── toolbar ── */
 .toolbar {
   display: flex; align-items: center; justify-content: space-between;
   padding-bottom: 20px; gap: 12px; flex-wrap: wrap;
@@ -153,8 +150,12 @@ header {
 .btn-danger:hover { background: var(--red-lt); border-color: var(--red); transform: translateY(-1px); }
 .btn-danger:active { transform: scale(0.97); }
 
-/* ── notes list ── */
-.notes-list { display: flex; flex-direction: column; gap: 16px; }
+/* ── notes list — single column, cards stack full width ── */
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
 /* ── note card ── */
 .note-card {
@@ -166,7 +167,9 @@ header {
   box-shadow: 0 2px 8px rgba(91,75,231,0.06), 0 8px 24px rgba(91,75,231,0.04);
   transition: border-color 0.22s var(--ease), box-shadow 0.22s var(--ease), transform 0.22s var(--ease);
   animation: cardIn 0.38s var(--ease) both;
-  overflow: hidden;
+  /* let card grow with content */
+  height: auto;
+  overflow: visible;
 }
 
 .note-card::before {
@@ -180,7 +183,6 @@ header {
 .note-card:focus-within { border-color: rgba(91,75,231,0.45); box-shadow: 0 0 0 3px rgba(91,75,231,0.1), 0 8px 28px rgba(91,75,231,0.1); }
 .note-card:focus-within::before { opacity: 1; }
 
-/* status-colored left bar */
 .note-card.status-done::before { background: linear-gradient(to bottom, var(--green), #34d399); opacity: 1 !important; }
 .note-card.status-ongoing::before { background: linear-gradient(to bottom, var(--amber), #fbbf24); opacity: 1 !important; }
 .note-card.status-done { border-color: rgba(5,150,105,0.3); }
@@ -192,11 +194,10 @@ header {
 }
 .note-card.removing { animation: cardOut 0.32s var(--ease-in) both; }
 @keyframes cardOut {
-  from { opacity: 1; transform: translateY(0) scale(1); max-height: 500px; margin-bottom: 16px; }
+  from { opacity: 1; transform: translateY(0) scale(1); max-height: 2000px; margin-bottom: 16px; }
   to   { opacity: 0; transform: translateY(-8px) scale(0.98); max-height: 0; padding: 0; margin: 0; border-width: 0; }
 }
 
-/* card header row */
 .card-top {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 14px; gap: 12px;
@@ -209,9 +210,6 @@ header {
   font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
   color: var(--muted); font-weight: 500; user-select: none; white-space: nowrap;
 }
-
-/* status pill */
-.status-wrap { display: flex; align-items: center; gap: 8px; }
 
 .status-select {
   appearance: none; -webkit-appearance: none;
@@ -255,14 +253,24 @@ header {
 }
 .del-btn:hover { background: #fecaca; border-color: var(--red); transform: scale(1.08); }
 
-/* textarea */
+/* ── textarea: grows with content, never scrolls ── */
 .note-textarea {
-  width: 100%; resize: none; overflow: hidden;
-  background: transparent; border: none; outline: none;
+  width: 100%;
+  resize: none;
+  overflow: hidden;
+  background: transparent;
+  border: none;
+  outline: none;
   color: var(--text);
-  font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 500;
-  line-height: 1.7; min-height: 58px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.7;
+  min-height: 48px;
+  height: auto;
+  display: block;
   caret-color: var(--accent);
+  word-break: break-word;
 }
 .note-textarea::placeholder { color: #b8b2e0; font-weight: 400; }
 
@@ -271,7 +279,6 @@ header {
   margin: 16px 0 14px;
 }
 
-/* hours row */
 .hours-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 
 .hours-label {
@@ -310,7 +317,6 @@ header {
 }
 .parsed-badge.show { opacity: 1; }
 
-/* ── empty state ── */
 .empty-state {
   text-align: center; padding: 80px 20px;
   animation: fadeUp 0.45s var(--ease) both;
@@ -331,13 +337,12 @@ header {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── footer ── */
 footer {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
   padding: 14px 24px 20px;
   background: linear-gradient(to top, var(--bg) 65%, transparent);
   pointer-events: none;
-  display: flex; justify-content: center;
+  display: flex; flex-direction: column; align-items: center; gap: 4px; justify-content: center;
 }
 footer p {
   font-family: 'DM Mono', monospace;
@@ -345,7 +350,6 @@ footer p {
   font-weight: 500;
 }
 
-/* ── toast ── */
 .toast {
   position: fixed; bottom: 70px; left: 50%;
   transform: translateX(-50%) translateY(10px);
@@ -358,7 +362,6 @@ footer p {
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ── confirm overlay ── */
 .overlay {
   position: fixed; inset: 0; z-index: 500;
   background: rgba(240,238,255,0.65);
@@ -404,11 +407,6 @@ footer p {
 }
 .btn-confirm-delete:hover { background: #b91c1c; transform: translateY(-1px); }
 
-/* ── save indicator ── */
-footer {
-  flex-direction: column;
-  gap: 4px;
-}
 .save-indicator {
   font-family: 'DM Mono', monospace;
   font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
@@ -417,26 +415,11 @@ footer {
 }
 .save-indicator.visible { opacity: 1; }
 
-/* ── scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-/* ── responsive desktop ── */
-@media (min-width: 700px) {
-  .notes-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 16px;
-    align-items: start;
-  }
-  .notes-list .empty-state {
-    grid-column: 1 / -1;
-  }
-}
-
-/* ── responsive mobile ── */
 @media (max-width: 540px) {
   .shell { padding: 0 16px 110px; }
   .note-card { padding: 18px 18px 16px; }
@@ -449,7 +432,6 @@ footer {
 </head>
 <body>
 
-<!-- Confirm overlay -->
 <div class="overlay" id="overlay">
   <div class="confirm-box">
     <span class="icon">🗑️</span>
@@ -505,7 +487,6 @@ footer {
 <div class="toast" id="toast"></div>
 
 <script>
-// ── PWA manifest ──
 (function(){
   const m={name:'TaskLog',short_name:'TaskLog',description:'Minimal task & hours tracker',
     start_url:'./',display:'standalone',background_color:'#f0eeff',theme_color:'#f0eeff',
@@ -515,7 +496,6 @@ footer {
   document.head.appendChild(l);
 })();
 
-// ── Service Worker ──
 (function(){
   if(!('serviceWorker' in navigator))return;
   const sw=`const C='tasklog-v3';
@@ -525,7 +505,6 @@ self.addEventListener('fetch',e=>{if(!e.request.url.startsWith(self.location.ori
   navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
 })();
 
-// ── Storage ──────────────────────────────────────────────────────────────────
 const KEY    = 'tasklog_notes_v2';
 const KEY_V1 = 'tasklog_notes_v1';
 let notes = [];
@@ -533,7 +512,6 @@ let _saveTimer   = null;
 let _pendingSave = false;
 let _saveIndicatorTimer = null;
 
-// ① Migrate v1 → v2 FIRST, before any load
 (function migrateV1() {
   try {
     const old = localStorage.getItem(KEY_V1);
@@ -543,13 +521,11 @@ let _saveIndicatorTimer = null;
         localStorage.setItem(KEY, JSON.stringify(
           arr.map(n => ({ status: 'none', ...n }))
         ));
-        console.info('TaskLog: migrated v1 → v2');
       }
     }
-  } catch(e) { console.warn('TaskLog: migration error', e); }
+  } catch(e) {}
 })();
 
-// ② Load — always reads from the canonical KEY
 function loadNotes() {
   try {
     const raw = localStorage.getItem(KEY);
@@ -557,55 +533,50 @@ function loadNotes() {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) { notes = []; return; }
     notes = parsed.map(n => ({
-      id:     (n.id     !== undefined && n.id !== null) ? n.id : (Date.now() + Math.random()),
-      text:   typeof n.text   === 'string' ? n.text   : '',
-      hours:  typeof n.hours  === 'string' ? n.hours  : '',
+      id:     (n.id !== undefined && n.id !== null) ? n.id : (Date.now() + Math.random()),
+      text:   typeof n.text === 'string' ? n.text : '',
+      hours:  typeof n.hours === 'string' ? n.hours : '',
       status: ['none','ongoing','done'].includes(n.status) ? n.status : 'none'
     }));
+    // Clean any corrupted text that contains JS code
+    notes = notes.map(n => ({
+      ...n,
+      text: n.text.includes('autoGrow') || n.text.includes('function ') ? '' : n.text
+    }));
   } catch(e) {
-    console.warn('TaskLog: load failed, keeping existing data.', e);
-    notes = notes.length ? notes : [];
+    notes = [];
   }
 }
 
-// ③ Immediate write — synchronous, guaranteed before tab closes
 function saveNow() {
   try {
     const serialized = JSON.stringify(notes);
     localStorage.setItem(KEY, serialized);
-    // Verify the write actually stuck
     const verify = localStorage.getItem(KEY);
     if (verify !== serialized) throw new Error('write verification failed');
     _pendingSave = false;
     showSaveIndicator();
   } catch(e) {
-    console.error('TaskLog: save failed!', e);
     showToast('⚠️ Save failed — storage may be full');
   }
 }
 
-// ④ Debounced save for rapid keystrokes
 function saveNotes() {
   _pendingSave = true;
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(saveNow, 250);
 }
 
-// ⑤ Flush immediately when tab goes hidden/unloads (iOS + desktop)
 function flushSave() {
-  if (_pendingSave) {
-    clearTimeout(_saveTimer);
-    saveNow();
-  }
+  if (_pendingSave) { clearTimeout(_saveTimer); saveNow(); }
 }
-window.addEventListener('beforeunload',      flushSave);
-window.addEventListener('pagehide',          flushSave); // iOS Safari
-window.addEventListener('blur',              flushSave); // tab switch
+window.addEventListener('beforeunload', flushSave);
+window.addEventListener('pagehide', flushSave);
+window.addEventListener('blur', flushSave);
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') flushSave();
 });
 
-// ⑥ Save indicator — small "Saved ✓" flash
 function showSaveIndicator() {
   const el = document.getElementById('saveIndicator');
   if (!el) return;
@@ -614,30 +585,28 @@ function showSaveIndicator() {
   _saveIndicatorTimer = setTimeout(() => el.classList.remove('visible'), 1400);
 }
 
-// ── Hours ──
-function parseHours(str){
-  if(!str||!str.trim())return null;
-  const s=str.trim();
-  const cm=s.match(/^(\d{1,3}):(\d{2})$/);
-  if(cm){const h=+cm[1],m=+cm[2];if(m<60)return h*60+m;}
-  const d=parseFloat(s);
-  return(!isNaN(d)&&d>=0)?Math.round(d*60):null;
+function parseHours(str) {
+  if (!str || !str.trim()) return null;
+  const s = str.trim();
+  const cm = s.match(/^(\d{1,3}):(\d{2})$/);
+  if (cm) { const h = +cm[1], m = +cm[2]; if (m < 60) return h * 60 + m; }
+  const d = parseFloat(s);
+  return (!isNaN(d) && d >= 0) ? Math.round(d * 60) : null;
 }
-function mins2str(m){return`${Math.floor(m/60)}:${String(m%60).padStart(2,'0')}`;}
-function totalMins(){
-  return notes.reduce((a,n)=>{
-    const m=parseHours(n.hours);
-    return a+(m!=null?m:0);
-  },0);
+function mins2str(m) { return `${Math.floor(m/60)}:${String(m%60).padStart(2,'0')}`; }
+function totalMins() {
+  return notes.reduce((a, n) => {
+    const m = parseHours(n.hours);
+    return a + (m != null ? m : 0);
+  }, 0);
 }
 
-// ── Render ──
-const list=document.getElementById('notesList');
+const list = document.getElementById('notesList');
 
-function renderAll(){
-  list.innerHTML='';
-  if(!notes.length){
-    list.insertAdjacentHTML('beforeend',`
+function renderAll() {
+  list.innerHTML = '';
+  if (!notes.length) {
+    list.insertAdjacentHTML('beforeend', `
       <div class="empty-state">
         <span class="glyph">📋</span>
         <h3>No tasks yet</h3>
@@ -645,7 +614,7 @@ function renderAll(){
         <span class="hint">Click "New Task" to begin</span>
       </div>`);
   } else {
-    [...notes].reverse().forEach((n)=>{
+    [...notes].reverse().forEach((n) => {
       list.appendChild(buildCard(n, notes.indexOf(n)));
     });
   }
@@ -653,19 +622,23 @@ function renderAll(){
   updateCount();
 }
 
-function buildCard(note, idx){
-  const card=document.createElement('div');
-  card.className='note-card';
-  card.dataset.id=note.id;
+function autoGrow(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = ta.scrollHeight + 'px';
+}
 
-  // status class on card
-  if(note.status==='done') card.classList.add('status-done');
-  else if(note.status==='ongoing') card.classList.add('status-ongoing');
+function buildCard(note, idx) {
+  const card = document.createElement('div');
+  card.className = 'note-card';
+  card.dataset.id = note.id;
 
-  const statusClass = note.status==='done'?'s-done':note.status==='ongoing'?'s-ongoing':'s-none';
-  const statusVal = note.status||'none';
+  if (note.status === 'done') card.classList.add('status-done');
+  else if (note.status === 'ongoing') card.classList.add('status-ongoing');
 
-  card.innerHTML=`
+  const statusClass = note.status === 'done' ? 's-done' : note.status === 'ongoing' ? 's-ongoing' : 's-none';
+  const statusVal = note.status || 'none';
+
+  card.innerHTML = `
     <div class="card-top">
       <div class="card-top-left">
         <span class="card-num">Task #${String(idx+1).padStart(2,'0')}</span>
@@ -691,121 +664,147 @@ function buildCard(note, idx){
       <span class="parsed-badge"></span>
     </div>`;
 
-  const ta=card.querySelector('.note-textarea');
-  const hi=card.querySelector('.hours-input');
-  const bx=card.querySelector('.parsed-badge');
-  const sel=card.querySelector('.status-select');
+  const ta  = card.querySelector('.note-textarea');
+  const hi  = card.querySelector('.hours-input');
+  const bx  = card.querySelector('.parsed-badge');
+  const sel = card.querySelector('.status-select');
 
-  ta.value=note.text||'';
-  hi.value=note.hours||'';
-  autoGrow(ta);
-  syncBadge(hi,bx);
+  ta.value  = note.text || '';
+  hi.value  = note.hours || '';
 
-  // textarea
-  ta.addEventListener('input',()=>{note.text=ta.value;autoGrow(ta);saveNotes();});
-  ta.addEventListener('keydown',e=>{
-    if(e.key==='Enter'&&!e.shiftKey){
+  // Run autoGrow AFTER inserting into DOM via requestAnimationFrame
+  requestAnimationFrame(() => autoGrow(ta));
+
+  syncBadge(hi, bx);
+
+  ta.addEventListener('input', () => {
+    note.text = ta.value;
+    autoGrow(ta);
+    saveNotes();
+  });
+
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       notes.push(makeNote());
-      saveNotes();renderAll();
-      requestAnimationFrame(()=>{
-        const first=list.querySelector('.note-card');
+      saveNotes();
+      renderAll();
+      requestAnimationFrame(() => {
+        const first = list.querySelector('.note-card');
         first?.querySelector('.note-textarea')?.focus();
       });
     }
   });
 
-  // hours
-  hi.addEventListener('input',()=>{
-    note.hours=hi.value;
-    const m=parseHours(hi.value);
-    hi.classList.toggle('invalid',!!hi.value.trim()&&m===null);
-    syncBadge(hi,bx);updateTotal();saveNotes();
-  });
-  hi.addEventListener('blur',()=>{
-    const m=parseHours(hi.value);
-    if(m!==null){hi.value=note.hours=mins2str(m);hi.classList.remove('invalid');syncBadge(hi,bx);saveNotes();}
-  });
-
-  // status
-  sel.addEventListener('change',()=>{
-    note.status=sel.value;
-    sel.className='status-select '+(sel.value==='done'?'s-done':sel.value==='ongoing'?'s-ongoing':'s-none');
-    card.classList.remove('status-done','status-ongoing');
-    if(sel.value==='done') card.classList.add('status-done');
-    else if(sel.value==='ongoing') card.classList.add('status-ongoing');
+  hi.addEventListener('input', () => {
+    note.hours = hi.value;
+    const m = parseHours(hi.value);
+    hi.classList.toggle('invalid', !!hi.value.trim() && m === null);
+    syncBadge(hi, bx);
+    updateTotal();
     saveNotes();
   });
 
-  // delete
-  card.querySelector('.del-btn').addEventListener('click',()=>removeCard(card,note.id));
+  hi.addEventListener('blur', () => {
+    const m = parseHours(hi.value);
+    if (m !== null) {
+      hi.value = note.hours = mins2str(m);
+      hi.classList.remove('invalid');
+      syncBadge(hi, bx);
+      saveNotes();
+    }
+  });
+
+  sel.addEventListener('change', () => {
+    note.status = sel.value;
+    sel.className = 'status-select ' + (sel.value==='done' ? 's-done' : sel.value==='ongoing' ? 's-ongoing' : 's-none');
+    card.classList.remove('status-done', 'status-ongoing');
+    if (sel.value === 'done') card.classList.add('status-done');
+    else if (sel.value === 'ongoing') card.classList.add('status-ongoing');
+    saveNotes();
+  });
+
+  card.querySelector('.del-btn').addEventListener('click', () => removeCard(card, note.id));
 
   return card;
 }
 
-function syncBadge(inp,badge){
-  const m=parseHours(inp.value);
-  if(m!==null&&inp.value.trim()){badge.textContent=`= ${mins2str(m)}`;badge.classList.add('show');}
-  else badge.classList.remove('show');
-}
-function autoGrow(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}
-
-function updateTotal(){
-  const el=document.getElementById('totalDisplay');
-  const next=mins2str(totalMins());
-  if(el.textContent!==next){
-    el.textContent=next;
-    el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');
+function syncBadge(inp, badge) {
+  const m = parseHours(inp.value);
+  if (m !== null && inp.value.trim()) {
+    badge.textContent = `= ${mins2str(m)}`;
+    badge.classList.add('show');
+  } else {
+    badge.classList.remove('show');
   }
 }
 
-function updateCount(){
-  const n=notes.length;
-  document.getElementById('countBadge').textContent=n===1?'1 task':`${n} tasks`;
+function updateTotal() {
+  const el = document.getElementById('totalDisplay');
+  const next = mins2str(totalMins());
+  if (el.textContent !== next) {
+    el.textContent = next;
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+  }
 }
 
-function makeNote(){return{id:Date.now()+Math.random(),text:'',hours:'',status:'none'};}
+function updateCount() {
+  const n = notes.length;
+  document.getElementById('countBadge').textContent = n === 1 ? '1 task' : `${n} tasks`;
+}
 
-function addNote(){
-  notes.push(makeNote());saveNotes();renderAll();
-  requestAnimationFrame(()=>{
-    const first=list.querySelector('.note-card');
-    if(!first)return;
+function makeNote() {
+  return { id: Date.now() + Math.random(), text: '', hours: '', status: 'none' };
+}
+
+function addNote() {
+  notes.push(makeNote());
+  saveNotes();
+  renderAll();
+  requestAnimationFrame(() => {
+    const first = list.querySelector('.note-card');
+    if (!first) return;
     first.querySelector('.note-textarea')?.focus();
-    first.scrollIntoView({behavior:'smooth',block:'nearest'});
+    first.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
 }
 
-function removeCard(el,id){
+function removeCard(el, id) {
   el.classList.add('removing');
-  el.addEventListener('animationend',()=>{
-    notes=notes.filter(n=>n.id!==id);saveNow();renderAll();
-  },{once:true});
+  el.addEventListener('animationend', () => {
+    notes = notes.filter(n => n.id !== id);
+    saveNow();
+    renderAll();
+  }, { once: true });
 }
 
-// ── Delete All ──
-const overlay=document.getElementById('overlay');
-document.getElementById('delAllBtn').addEventListener('click',()=>{
-  if(!notes.length){showToast('No tasks to delete');return;}
+const overlay = document.getElementById('overlay');
+document.getElementById('delAllBtn').addEventListener('click', () => {
+  if (!notes.length) { showToast('No tasks to delete'); return; }
   overlay.classList.add('show');
 });
-document.getElementById('cancelDeleteAll').addEventListener('click',()=>overlay.classList.remove('show'));
-document.getElementById('confirmDeleteAll').addEventListener('click',()=>{
-  notes=[];saveNow();renderAll();overlay.classList.remove('show');showToast('All tasks deleted');
+document.getElementById('cancelDeleteAll').addEventListener('click', () => overlay.classList.remove('show'));
+document.getElementById('confirmDeleteAll').addEventListener('click', () => {
+  notes = [];
+  saveNow();
+  renderAll();
+  overlay.classList.remove('show');
+  showToast('All tasks deleted');
 });
-overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('show');});
+overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('show'); });
 
-// ── Toast ──
 let toastTimer;
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-// ── Init ──
-document.getElementById('addBtn').addEventListener('click',addNote);
+document.getElementById('addBtn').addEventListener('click', addNote);
 loadNotes();
 renderAll();
 </script>
