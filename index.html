@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#f0eeff"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<title>TaskLog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:           #f0eeff;
+  --surface:      #ffffff;
+  --border:       #d8d3f5;
+  --border2:      #b8b0f0;
+  --text:         #0d0c2b;
+  --text2:        #3b3880;
+  --muted:        #6e6aa0;
+  --accent:       #5b4be7;
+  --accent-h:     #4338d4;
+  --accent-lt:    #ece9ff;
+  --green:        #059669;
+  --green-lt:     #d1fae5;
+  --green-text:   #065f46;
+  --red:          #dc2626;
+  --red-lt:       #fee2e2;
+  --amber:        #d97706;
+  --amber-lt:     #fef3c7;
+  --amber-text:   #92400e;
+  --radius:       14px;
+  --ease:         cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in:      cubic-bezier(0.55, 0, 1, 0.45);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 80% -10%, rgba(120,100,255,0.14) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at -10% 80%, rgba(80,200,220,0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 50% 110%, rgba(160,100,255,0.08) 0%, transparent 70%);
+}
+
+/* ── layout ── */
+.shell {
+  position: relative; z-index: 1;
+  max-width: 860px; margin: 0 auto;
+  padding: 0 28px 140px;
+}
+
+/* ── header ── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  padding: 28px 0 16px;
+  background: linear-gradient(to bottom, var(--bg) 78%, transparent);
+}
+
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+
+.brand h1 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(34px, 5vw, 50px);
+  font-weight: 400; font-style: italic;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+  line-height: 1;
+}
+.brand p {
+  font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted); margin-top: 6px; font-family: 'DM Mono', monospace;
+  font-weight: 500;
+}
+
+.total-block { text-align: right; }
+.total-label {
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--muted); font-family: 'DM Mono', monospace;
+  font-weight: 500; display: block; margin-bottom: 2px;
+}
+.total-time {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 400; letter-spacing: -0.02em;
+  color: var(--green); line-height: 1;
+}
+.total-time.bump { animation: bump 0.32s var(--ease); }
+@keyframes bump {
+  0%  { transform: scale(1); }
+  45% { transform: scale(1.12); }
+  100%{ transform: scale(1); }
+}
+
+.header-divider {
+  height: 1.5px;
+  background: linear-gradient(to right, var(--border2), var(--border), transparent);
+  margin: 16px 0 14px; border-radius: 1px;
+}
+
+/* ── toolbar ── */
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 20px; gap: 12px; flex-wrap: wrap;
+}
+
+.count-badge {
+  font-size: 13px; font-weight: 600; color: var(--text2);
+  background: white; padding: 5px 16px; border-radius: 20px;
+  border: 1.5px solid var(--border2);
+  box-shadow: 0 1px 4px rgba(91,75,231,0.08);
+}
+
+.toolbar-right { display: flex; gap: 10px; align-items: center; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 0 20px; height: 42px; border-radius: 11px;
+  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
+  cursor: pointer; border: none; letter-spacing: 0.01em;
+  transition: all 0.18s var(--ease); white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--accent); color: #fff;
+  box-shadow: 0 3px 14px rgba(91,75,231,0.38);
+}
+.btn-primary:hover { background: var(--accent-h); transform: translateY(-1px); box-shadow: 0 6px 22px rgba(91,75,231,0.45); }
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-danger {
+  background: white; color: var(--red);
+  border: 1.5px solid rgba(220,38,38,0.3);
+  box-shadow: 0 1px 4px rgba(220,38,38,0.08);
+}
+.btn-danger:hover { background: var(--red-lt); border-color: var(--red); transform: translateY(-1px); }
+.btn-danger:active { transform: scale(0.97); }
+
+/* ── notes list ── */
+.notes-list { display: flex; flex-direction: column; gap: 16px; }
+
+/* ── note card ── */
+.note-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px 20px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(91,75,231,0.06), 0 8px 24px rgba(91,75,231,0.04);
+  transition: border-color 0.22s var(--ease), box-shadow 0.22s var(--ease), transform 0.22s var(--ease);
+  animation: cardIn 0.38s var(--ease) both;
+  overflow: hidden;
+}
+
+.note-card::before {
+  content: ''; position: absolute; left: 0; top: 20px; bottom: 20px;
+  width: 4px; border-radius: 0 4px 4px 0;
+  background: linear-gradient(to bottom, var(--accent), #a29bfe);
+  opacity: 0; transition: opacity 0.22s;
+}
+.note-card:hover { border-color: var(--border2); box-shadow: 0 4px 20px rgba(91,75,231,0.12), 0 12px 32px rgba(91,75,231,0.07); transform: translateY(-2px); }
+.note-card:hover::before { opacity: 1; }
+.note-card:focus-within { border-color: rgba(91,75,231,0.45); box-shadow: 0 0 0 3px rgba(91,75,231,0.1), 0 8px 28px rgba(91,75,231,0.1); }
+.note-card:focus-within::before { opacity: 1; }
+
+/* status-colored left bar */
+.note-card.status-done::before { background: linear-gradient(to bottom, var(--green), #34d399); opacity: 1 !important; }
+.note-card.status-ongoing::before { background: linear-gradient(to bottom, var(--amber), #fbbf24); opacity: 1 !important; }
+.note-card.status-done { border-color: rgba(5,150,105,0.3); }
+.note-card.status-ongoing { border-color: rgba(217,119,6,0.3); }
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(-12px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.note-card.removing { animation: cardOut 0.32s var(--ease-in) both; }
+@keyframes cardOut {
+  from { opacity: 1; transform: translateY(0) scale(1); max-height: 500px; margin-bottom: 16px; }
+  to   { opacity: 0; transform: translateY(-8px) scale(0.98); max-height: 0; padding: 0; margin: 0; border-width: 0; }
+}
+
+/* card header row */
+.card-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px; gap: 12px;
+}
+
+.card-top-left { display: flex; align-items: center; gap: 12px; }
+
+.card-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--muted); font-weight: 500; user-select: none; white-space: nowrap;
+}
+
+/* status pill */
+.status-wrap { display: flex; align-items: center; gap: 8px; }
+
+.status-select {
+  appearance: none; -webkit-appearance: none;
+  border: none; outline: none; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 4px 12px 4px 10px; border-radius: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 26px;
+  transition: all 0.18s var(--ease);
+}
+
+.status-select.s-none {
+  background-color: #f5f4ff;
+  color: var(--muted);
+  border: 1.5px solid var(--border2);
+}
+.status-select.s-ongoing {
+  background-color: var(--amber-lt);
+  color: var(--amber-text);
+  border: 1.5px solid rgba(217,119,6,0.35);
+}
+.status-select.s-done {
+  background-color: var(--green-lt);
+  color: var(--green-text);
+  border: 1.5px solid rgba(5,150,105,0.35);
+}
+
+.card-actions { display: flex; align-items: center; gap: 8px; opacity: 0; transition: opacity 0.16s; }
+.note-card:hover .card-actions,
+.note-card:focus-within .card-actions { opacity: 1; }
+
+.del-btn {
+  width: 32px; height: 32px; border-radius: 9px;
+  background: var(--red-lt); border: 1.5px solid rgba(220,38,38,0.2);
+  color: var(--red); cursor: pointer;
+  display: grid; place-items: center;
+  transition: all 0.16s var(--ease); flex-shrink: 0;
+}
+.del-btn:hover { background: #fecaca; border-color: var(--red); transform: scale(1.08); }
+
+/* textarea */
+.note-textarea {
+  width: 100%; resize: none; overflow: hidden;
+  background: transparent; border: none; outline: none;
+  color: var(--text);
+  font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 500;
+  line-height: 1.7; min-height: 58px;
+  caret-color: var(--accent);
+}
+.note-textarea::placeholder { color: #b8b2e0; font-weight: 400; }
+
+.card-divider {
+  height: 1px; background: var(--border);
+  margin: 16px 0 14px;
+}
+
+/* hours row */
+.hours-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+.hours-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--muted); font-weight: 500; white-space: nowrap; user-select: none; min-width: 46px;
+}
+
+.hours-input {
+  background: #f7f6ff; border: 1.5px solid var(--border2);
+  border-radius: 10px; padding: 8px 14px;
+  color: var(--text); font-family: 'DM Mono', monospace;
+  font-size: 14px; font-weight: 500;
+  width: 126px; outline: none; caret-color: var(--green);
+  transition: all 0.18s var(--ease);
+}
+.hours-input::placeholder { color: #c4bfe8; }
+.hours-input:focus {
+  border-color: rgba(5,150,105,0.5);
+  background: #f0fdf8;
+  box-shadow: 0 0 0 3px rgba(5,150,105,0.1);
+}
+.hours-input.invalid {
+  border-color: rgba(220,38,38,0.5) !important;
+  background: #fff5f5 !important;
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.08) !important;
+}
+
+.parsed-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px; font-weight: 500;
+  color: var(--green-text); opacity: 0;
+  background: var(--green-lt); padding: 4px 12px; border-radius: 20px;
+  border: 1px solid rgba(5,150,105,0.2);
+  transition: opacity 0.25s var(--ease); white-space: nowrap;
+}
+.parsed-badge.show { opacity: 1; }
+
+/* ── empty state ── */
+.empty-state {
+  text-align: center; padding: 80px 20px;
+  animation: fadeUp 0.45s var(--ease) both;
+}
+.empty-state .glyph { font-size: 52px; margin-bottom: 20px; display: block; opacity: 0.35; }
+.empty-state h3 { font-family: 'DM Serif Display', serif; font-size: 24px; font-weight: 400; color: var(--text2); margin-bottom: 8px; }
+.empty-state p { color: var(--muted); font-size: 14px; line-height: 1.9; font-weight: 500; }
+.empty-state .hint {
+  margin-top: 24px; display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text2); background: white;
+  padding: 7px 18px; border-radius: 20px; border: 1.5px solid var(--border2);
+  font-weight: 500;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── footer ── */
+footer {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  padding: 14px 24px 20px;
+  background: linear-gradient(to top, var(--bg) 65%, transparent);
+  pointer-events: none;
+  display: flex; justify-content: center;
+}
+footer p {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted);
+  font-weight: 500;
+}
+
+/* ── toast ── */
+.toast {
+  position: fixed; bottom: 70px; left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--text); color: #fff;
+  border-radius: 11px; padding: 10px 24px;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+  opacity: 0; pointer-events: none; z-index: 999;
+  transition: all 0.26s var(--ease); white-space: nowrap;
+  box-shadow: 0 6px 24px rgba(17,16,58,0.22);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── confirm overlay ── */
+.overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(240,238,255,0.65);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  display: grid; place-items: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.22s var(--ease);
+}
+.overlay.show { opacity: 1; pointer-events: all; }
+
+.confirm-box {
+  background: white; border: 1.5px solid var(--border2);
+  border-radius: 22px; padding: 40px 44px;
+  box-shadow: 0 24px 64px rgba(91,75,231,0.2);
+  text-align: center; max-width: 380px; width: 90%;
+  transform: scale(0.95) translateY(10px);
+  transition: transform 0.26s var(--ease);
+}
+.overlay.show .confirm-box { transform: scale(1) translateY(0); }
+.confirm-box .icon { font-size: 44px; margin-bottom: 16px; display: block; }
+.confirm-box h3 {
+  font-family: 'DM Serif Display', serif; font-size: 24px; font-weight: 400;
+  color: var(--text); margin-bottom: 8px;
+}
+.confirm-box p { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 30px; font-weight: 500; }
+.confirm-btns { display: flex; gap: 10px; justify-content: center; }
+
+.btn-cancel {
+  padding: 0 24px; height: 44px; border-radius: 11px;
+  background: var(--accent-lt); border: 1.5px solid var(--border2);
+  color: var(--text2); cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
+  transition: all 0.16s var(--ease);
+}
+.btn-cancel:hover { background: #ddd9ff; }
+
+.btn-confirm-delete {
+  padding: 0 24px; height: 44px; border-radius: 11px;
+  background: var(--red); border: none; color: #fff; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
+  box-shadow: 0 4px 14px rgba(220,38,38,0.32);
+  transition: all 0.16s var(--ease);
+}
+.btn-confirm-delete:hover { background: #b91c1c; transform: translateY(-1px); }
+
+/* ── save indicator ── */
+footer {
+  flex-direction: column;
+  gap: 4px;
+}
+.save-indicator {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--green); font-weight: 600;
+  opacity: 0; transition: opacity 0.3s var(--ease);
+}
+.save-indicator.visible { opacity: 1; }
+
+/* ── scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ── responsive desktop ── */
+@media (min-width: 700px) {
+  .notes-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+    align-items: start;
+  }
+  .notes-list .empty-state {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── responsive mobile ── */
+@media (max-width: 540px) {
+  .shell { padding: 0 16px 110px; }
+  .note-card { padding: 18px 18px 16px; }
+  .card-actions { opacity: 1; }
+  .btn span { display: none; }
+  .btn { padding: 0 14px; min-width: 42px; }
+  .count-badge { font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Confirm overlay -->
+<div class="overlay" id="overlay">
+  <div class="confirm-box">
+    <span class="icon">🗑️</span>
+    <h3>Delete All Tasks?</h3>
+    <p>All your task notes will be permanently removed. This cannot be undone.</p>
+    <div class="confirm-btns">
+      <button class="btn-cancel" id="cancelDeleteAll">Cancel</button>
+      <button class="btn-confirm-delete" id="confirmDeleteAll">Yes, Delete All</button>
+    </div>
+  </div>
+</div>
+
+<div class="shell">
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <h1>TaskLog</h1>
+        <p>Task &amp; Time Tracker</p>
+      </div>
+      <div class="total-block">
+        <span class="total-label">Total Hours</span>
+        <span class="total-time" id="totalDisplay">0:00</span>
+      </div>
+    </div>
+    <div class="header-divider"></div>
+  </header>
+
+  <div class="toolbar">
+    <span class="count-badge" id="countBadge">0 tasks</span>
+    <div class="toolbar-right">
+      <button class="btn btn-danger" id="delAllBtn">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M1.5 3h10M4.5 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 3l.4 7M8 3l-.4 7M6.5 3v7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Delete All</span>
+      </button>
+      <button class="btn btn-primary" id="addBtn">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>New Task</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="notes-list" id="notesList"></div>
+</div>
+
+<footer>
+  <p>Made by J-ALDEV</p>
+  <span class="save-indicator" id="saveIndicator">Saved ✓</span>
+</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── PWA manifest ──
+(function(){
+  const m={name:'TaskLog',short_name:'TaskLog',description:'Minimal task & hours tracker',
+    start_url:'./',display:'standalone',background_color:'#f0eeff',theme_color:'#f0eeff',
+    icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%235b4be7'/><text y='138' x='96' text-anchor='middle' font-size='110' font-family='Georgia' fill='white'>T</text></svg>",sizes:'192x192',type:'image/svg+xml'}]};
+  const l=document.createElement('link');l.rel='manifest';
+  l.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'}));
+  document.head.appendChild(l);
+})();
+
+// ── Service Worker ──
+(function(){
+  if(!('serviceWorker' in navigator))return;
+  const sw=`const C='tasklog-v3';
+self.addEventListener('install',()=>self.skipWaiting());
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});
+self.addEventListener('fetch',e=>{if(!e.request.url.startsWith(self.location.origin))return;e.respondWith(caches.open(C).then(c=>c.match(e.request).then(h=>{if(h)return h;return fetch(e.request).then(r=>{c.put(e.request,r.clone());return r;});})));});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+})();
+
+// ── Storage ──────────────────────────────────────────────────────────────────
+const KEY    = 'tasklog_notes_v2';
+const KEY_V1 = 'tasklog_notes_v1';
+let notes = [];
+let _saveTimer   = null;
+let _pendingSave = false;
+let _saveIndicatorTimer = null;
+
+// ① Migrate v1 → v2 FIRST, before any load
+(function migrateV1() {
+  try {
+    const old = localStorage.getItem(KEY_V1);
+    if (old && !localStorage.getItem(KEY)) {
+      const arr = JSON.parse(old);
+      if (Array.isArray(arr)) {
+        localStorage.setItem(KEY, JSON.stringify(
+          arr.map(n => ({ status: 'none', ...n }))
+        ));
+        console.info('TaskLog: migrated v1 → v2');
+      }
+    }
+  } catch(e) { console.warn('TaskLog: migration error', e); }
+})();
+
+// ② Load — always reads from the canonical KEY
+function loadNotes() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) { notes = []; return; }
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) { notes = []; return; }
+    notes = parsed.map(n => ({
+      id:     (n.id     !== undefined && n.id !== null) ? n.id : (Date.now() + Math.random()),
+      text:   typeof n.text   === 'string' ? n.text   : '',
+      hours:  typeof n.hours  === 'string' ? n.hours  : '',
+      status: ['none','ongoing','done'].includes(n.status) ? n.status : 'none'
+    }));
+  } catch(e) {
+    console.warn('TaskLog: load failed, keeping existing data.', e);
+    notes = notes.length ? notes : [];
+  }
+}
+
+// ③ Immediate write — synchronous, guaranteed before tab closes
+function saveNow() {
+  try {
+    const serialized = JSON.stringify(notes);
+    localStorage.setItem(KEY, serialized);
+    // Verify the write actually stuck
+    const verify = localStorage.getItem(KEY);
+    if (verify !== serialized) throw new Error('write verification failed');
+    _pendingSave = false;
+    showSaveIndicator();
+  } catch(e) {
+    console.error('TaskLog: save failed!', e);
+    showToast('⚠️ Save failed — storage may be full');
+  }
+}
+
+// ④ Debounced save for rapid keystrokes
+function saveNotes() {
+  _pendingSave = true;
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveNow, 250);
+}
+
+// ⑤ Flush immediately when tab goes hidden/unloads (iOS + desktop)
+function flushSave() {
+  if (_pendingSave) {
+    clearTimeout(_saveTimer);
+    saveNow();
+  }
+}
+window.addEventListener('beforeunload',      flushSave);
+window.addEventListener('pagehide',          flushSave); // iOS Safari
+window.addEventListener('blur',              flushSave); // tab switch
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushSave();
+});
+
+// ⑥ Save indicator — small "Saved ✓" flash
+function showSaveIndicator() {
+  const el = document.getElementById('saveIndicator');
+  if (!el) return;
+  el.classList.add('visible');
+  clearTimeout(_saveIndicatorTimer);
+  _saveIndicatorTimer = setTimeout(() => el.classList.remove('visible'), 1400);
+}
+
+// ── Hours ──
+function parseHours(str){
+  if(!str||!str.trim())return null;
+  const s=str.trim();
+  const cm=s.match(/^(\d{1,3}):(\d{2})$/);
+  if(cm){const h=+cm[1],m=+cm[2];if(m<60)return h*60+m;}
+  const d=parseFloat(s);
+  return(!isNaN(d)&&d>=0)?Math.round(d*60):null;
+}
+function mins2str(m){return`${Math.floor(m/60)}:${String(m%60).padStart(2,'0')}`;}
+function totalMins(){
+  return notes.reduce((a,n)=>{
+    const m=parseHours(n.hours);
+    return a+(m!=null?m:0);
+  },0);
+}
+
+// ── Render ──
+const list=document.getElementById('notesList');
+
+function renderAll(){
+  list.innerHTML='';
+  if(!notes.length){
+    list.insertAdjacentHTML('beforeend',`
+      <div class="empty-state">
+        <span class="glyph">📋</span>
+        <h3>No tasks yet</h3>
+        <p>Start logging what you worked on<br>and how long it took.</p>
+        <span class="hint">Click "New Task" to begin</span>
+      </div>`);
+  } else {
+    [...notes].reverse().forEach((n)=>{
+      list.appendChild(buildCard(n, notes.indexOf(n)));
+    });
+  }
+  updateTotal();
+  updateCount();
+}
+
+function buildCard(note, idx){
+  const card=document.createElement('div');
+  card.className='note-card';
+  card.dataset.id=note.id;
+
+  // status class on card
+  if(note.status==='done') card.classList.add('status-done');
+  else if(note.status==='ongoing') card.classList.add('status-ongoing');
+
+  const statusClass = note.status==='done'?'s-done':note.status==='ongoing'?'s-ongoing':'s-none';
+  const statusVal = note.status||'none';
+
+  card.innerHTML=`
+    <div class="card-top">
+      <div class="card-top-left">
+        <span class="card-num">Task #${String(idx+1).padStart(2,'0')}</span>
+        <select class="status-select ${statusClass}" title="Set status">
+          <option value="none" ${statusVal==='none'?'selected':''}>— Status</option>
+          <option value="ongoing" ${statusVal==='ongoing'?'selected':''}>⏳ Ongoing</option>
+          <option value="done" ${statusVal==='done'?'selected':''}>✅ Done</option>
+        </select>
+      </div>
+      <div class="card-actions">
+        <button class="del-btn" title="Delete task">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2 2l8 8M10 2L2 10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <textarea class="note-textarea" placeholder="What did you work on\u2026" spellcheck="false"></textarea>
+    <div class="card-divider"></div>
+    <div class="hours-row">
+      <span class="hours-label">Hours</span>
+      <input class="hours-input" type="text" placeholder="e.g. 2:30" autocomplete="off" spellcheck="false"/>
+      <span class="parsed-badge"></span>
+    </div>`;
+
+  const ta=card.querySelector('.note-textarea');
+  const hi=card.querySelector('.hours-input');
+  const bx=card.querySelector('.parsed-badge');
+  const sel=card.querySelector('.status-select');
+
+  ta.value=note.text||'';
+  hi.value=note.hours||'';
+  autoGrow(ta);
+  syncBadge(hi,bx);
+
+  // textarea
+  ta.addEventListener('input',()=>{note.text=ta.value;autoGrow(ta);saveNotes();});
+  ta.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!e.shiftKey){
+      e.preventDefault();
+      notes.push(makeNote());
+      saveNotes();renderAll();
+      requestAnimationFrame(()=>{
+        const first=list.querySelector('.note-card');
+        first?.querySelector('.note-textarea')?.focus();
+      });
+    }
+  });
+
+  // hours
+  hi.addEventListener('input',()=>{
+    note.hours=hi.value;
+    const m=parseHours(hi.value);
+    hi.classList.toggle('invalid',!!hi.value.trim()&&m===null);
+    syncBadge(hi,bx);updateTotal();saveNotes();
+  });
+  hi.addEventListener('blur',()=>{
+    const m=parseHours(hi.value);
+    if(m!==null){hi.value=note.hours=mins2str(m);hi.classList.remove('invalid');syncBadge(hi,bx);saveNotes();}
+  });
+
+  // status
+  sel.addEventListener('change',()=>{
+    note.status=sel.value;
+    sel.className='status-select '+(sel.value==='done'?'s-done':sel.value==='ongoing'?'s-ongoing':'s-none');
+    card.classList.remove('status-done','status-ongoing');
+    if(sel.value==='done') card.classList.add('status-done');
+    else if(sel.value==='ongoing') card.classList.add('status-ongoing');
+    saveNotes();
+  });
+
+  // delete
+  card.querySelector('.del-btn').addEventListener('click',()=>removeCard(card,note.id));
+
+  return card;
+}
+
+function syncBadge(inp,badge){
+  const m=parseHours(inp.value);
+  if(m!==null&&inp.value.trim()){badge.textContent=`= ${mins2str(m)}`;badge.classList.add('show');}
+  else badge.classList.remove('show');
+}
+function autoGrow(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}
+
+function updateTotal(){
+  const el=document.getElementById('totalDisplay');
+  const next=mins2str(totalMins());
+  if(el.textContent!==next){
+    el.textContent=next;
+    el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');
+  }
+}
+
+function updateCount(){
+  const n=notes.length;
+  document.getElementById('countBadge').textContent=n===1?'1 task':`${n} tasks`;
+}
+
+function makeNote(){return{id:Date.now()+Math.random(),text:'',hours:'',status:'none'};}
+
+function addNote(){
+  notes.push(makeNote());saveNotes();renderAll();
+  requestAnimationFrame(()=>{
+    const first=list.querySelector('.note-card');
+    if(!first)return;
+    first.querySelector('.note-textarea')?.focus();
+    first.scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+}
+
+function removeCard(el,id){
+  el.classList.add('removing');
+  el.addEventListener('animationend',()=>{
+    notes=notes.filter(n=>n.id!==id);saveNow();renderAll();
+  },{once:true});
+}
+
+// ── Delete All ──
+const overlay=document.getElementById('overlay');
+document.getElementById('delAllBtn').addEventListener('click',()=>{
+  if(!notes.length){showToast('No tasks to delete');return;}
+  overlay.classList.add('show');
+});
+document.getElementById('cancelDeleteAll').addEventListener('click',()=>overlay.classList.remove('show'));
+document.getElementById('confirmDeleteAll').addEventListener('click',()=>{
+  notes=[];saveNow();renderAll();overlay.classList.remove('show');showToast('All tasks deleted');
+});
+overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('show');});
+
+// ── Toast ──
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+// ── Init ──
+document.getElementById('addBtn').addEventListener('click',addNote);
+loadNotes();
+renderAll();
+</script>
+</body>
+</html>
