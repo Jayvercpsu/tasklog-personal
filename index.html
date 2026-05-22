@@ -836,15 +836,25 @@ function buildCard(note, idx) {
   });
 
   ta.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter') {
       e.preventDefault();
-      notes.push(makeNote());
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      const text = ta.value;
+      
+      if (e.shiftKey) {
+        // Shift+Enter: paragraph break (two newlines)
+        ta.value = text.substring(0, start) + '\n\n' + text.substring(end);
+        ta.selectionStart = ta.selectionEnd = start + 2;
+      } else {
+        // Enter: single newline
+        ta.value = text.substring(0, start) + '\n' + text.substring(end);
+        ta.selectionStart = ta.selectionEnd = start + 1;
+      }
+      
+      note.text = ta.value;
+      autoGrow(ta);
       saveNotes();
-      renderAll();
-      requestAnimationFrame(() => {
-        const first = list.querySelector('.note-card');
-        first?.querySelector('.note-textarea')?.focus();
-      });
     }
   });
 
